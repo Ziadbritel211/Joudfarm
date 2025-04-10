@@ -19,7 +19,8 @@ import CheckoutScreen from './screens/CheckoutScreen';
 import OrderConfirmationScreen from './screens/OrderConfirmationScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import PushNotificationTestScreen from './screens/PushNotificationTestScreen';
+import ChatScreen from './screens/ChatScreen';
+import ChatListScreen from './screens/ChatListScreen'; // ⬅️ Important!
 
 import { RoleProvider, RoleContext } from './RoleContext';
 import { CartProvider } from './CartContext';
@@ -41,7 +42,7 @@ function AppNavigator() {
   
   if (loading) {
     return (
-      <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -49,15 +50,8 @@ function AppNavigator() {
   
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!user ? (
-        role === null ? (
-          <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} />
-          </>
-        )
+      {(!user || role === null) ? (
+        <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       ) : (
         role === 'farmer' ? (
           <>
@@ -66,6 +60,8 @@ function AppNavigator() {
             <Stack.Screen name="AddFarm" component={AddFarmScreen} />
             <Stack.Screen name="AddProduct" component={AddProductScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="ChatList" component={ChatListScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
           </>
         ) : (
           <>
@@ -76,7 +72,7 @@ function AppNavigator() {
             <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
             <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="PushNotificationTest" component={PushNotificationTestScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
           </>
         )
       )}

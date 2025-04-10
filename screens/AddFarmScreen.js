@@ -1,8 +1,8 @@
 // screens/AddFarmScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 
 export default function AddFarmScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -10,26 +10,25 @@ export default function AddFarmScreen({ navigation }) {
   const [product, setProduct] = useState('');
 
   const handleAddFarm = async () => {
-    if (!name || !location || !product) {
-      Alert.alert('Please fill in all fields.');
-      return;
-    }
     try {
-      await addDoc(collection(db, 'farms'), {
+      const farmData = {
         name,
         location,
         product,
-      });
-      Alert.alert('Farm added successfully!');
+        farmerId: auth.currentUser.uid,  // Save the current user's UID as the farmerId
+        farmerName: auth.currentUser.displayName || '', // Optional: Save the display name
+      };
+      await addDoc(collection(db, 'farms'), farmData);
+      Alert.alert("Farm Added", "Your farm has been added successfully.");
       navigation.goBack();
     } catch (error) {
-      console.error(error);
-      Alert.alert('Error adding farm:', error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Add Farm</Text>
       <TextInput
         style={styles.input}
         placeholder="Farm Name"
@@ -49,11 +48,19 @@ export default function AddFarmScreen({ navigation }) {
         onChangeText={setProduct}
       />
       <Button title="Add Farm" onPress={handleAddFarm} />
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  input: { borderWidth: 1, padding: 10, marginVertical: 10, borderRadius: 5 },
+  container: { flex: 1, padding: 20, marginTop: 50 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
 });

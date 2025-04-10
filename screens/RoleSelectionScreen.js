@@ -6,26 +6,22 @@ import { RoleContext } from '../RoleContext';
 export default function RoleSelectionScreen({ navigation }) {
   const { setRole } = useContext(RoleContext);
 
-  const chooseFarmer = () => {
-    setRole('farmer');
-    navigation.replace('Login');
-  };
-
-  const chooseConsumer = () => {
-    setRole('consumer');
+  const selectRole = (selectedRole) => {
+    setRole(selectedRole);
+    // Navigate to Login (or another screen) after selecting the role
     navigation.replace('Login');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Select Your Role for JoudFarm</Text>
-      <Button title="I am a Farmer" onPress={chooseFarmer} />
-      <Button title="I am a Consumer" onPress={chooseConsumer} />
+      <Text style={styles.title}>Select Your Role</Text>
+      <Button title="Consumer" onPress={() => selectRole('consumer')} />
+      <Button title="Farmer" onPress={() => selectRole('farmer')} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 24, marginBottom: 20 },
 });

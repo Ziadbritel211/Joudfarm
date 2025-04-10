@@ -7,7 +7,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
   const addToCart = (product) => {
-    // Optionally, check for duplicates here
+    // For simplicity, we add the product directly. Optionally check for duplicates.
     setCartItems([...cartItems, product]);
   };
 

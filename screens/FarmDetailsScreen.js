@@ -2,15 +2,19 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { RoleContext } from '../RoleContext';
 import { CartContext } from '../CartContext';
 
 export default function FarmDetailsScreen({ route, navigation }) {
   const { farm } = route.params;
   const { role } = useContext(RoleContext);
-  const { addToCart } = useContext(CartContext); // This will now be defined via CartProvider
+  const { addToCart } = useContext(CartContext);
   const [products, setProducts] = useState([]);
+
+  // Debug logs to verify role and farm object
+  console.log("FarmDetailsScreen: role =", role);
+  console.log("FarmDetailsScreen: farm object =", farm);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -28,13 +32,27 @@ export default function FarmDetailsScreen({ route, navigation }) {
     fetchProducts();
   }, [farm.id]);
 
+  const handleChat = () => {
+    const currentUserId = auth.currentUser.uid;
+    // For testing: if farm.farmerId is undefined, use a dummy value
+    const farmerId = farm.farmerId || 'dummyFarmerId';
+    if (!farm.farmerId) {
+      console.warn("handleChat: farm.farmerId is missing, using dummyFarmerId for testing.");
+    }
+    // Generate a unique chatId by sorting the IDs alphabetically
+    const chatId = [currentUserId, farmerId].sort().join('_');
+    const otherUserName = farm.farmerName ? farm.farmerName : 'Farmer';
+    console.log("Navigating to Chat with chatId:", chatId, "and otherUserName:", otherUserName);
+    navigation.navigate('Chat', { chatId, otherUserName });
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.productItem}>
       <Text style={styles.productName}>{item.productName}</Text>
       <Text>Price: ${item.price}</Text>
       {item.description ? <Text>Description: {item.description}</Text> : null}
       {role === 'farmer' ? (
-        <Button title="Edit Product" onPress={() => alert('Edit not implemented')} />
+        <Button title="Edit Product" onPress={() => alert('Edit functionality not implemented')} />
       ) : (
         <Button title="Add to Cart" onPress={() => addToCart(item)} />
       )}
@@ -47,12 +65,17 @@ export default function FarmDetailsScreen({ route, navigation }) {
       <Text style={styles.detail}>Location: {farm.location}</Text>
       <Text style={styles.detail}>Product: {farm.product}</Text>
       
-      {/* Only show Add Product button for farmers */}
+      {/* Display debug info for farmerId */}
+      <Text style={styles.debug}>Debug: farmerId = {farm.farmerId ? farm.farmerId : 'undefined (using dummy)'}</Text>
+      
+      {/* For farmers */}
       {role === 'farmer' && (
-        <Button
-          title="Add Product"
-          onPress={() => navigation.navigate('AddProduct', { farmId: farm.id })}
-        />
+        <Button title="Add Product" onPress={() => navigation.navigate('AddProduct', { farmId: farm.id })} />
+      )}
+      
+      {/* For consumers: always show the chat button */}
+      {role === 'consumer' && (
+        <Button title="Chat with Farmer" onPress={handleChat} />
       )}
       
       <Text style={styles.subtitle}>Products:</Text>
@@ -75,4 +98,5 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10 },
   productItem: { padding: 15, backgroundColor: '#f1f1f1', borderRadius: 8, marginVertical: 8 },
   productName: { fontSize: 18, fontWeight: 'bold' },
+  debug: { color: 'blue', marginVertical: 10, fontSize: 14 },
 });
